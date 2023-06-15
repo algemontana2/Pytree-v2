@@ -157,6 +157,40 @@ class Parser(object):
             last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, strict)
             line_number += 1
 
+
+    def get_individual_birth_places (self):
+        birth_places = []
+        for individual in self.get_individual_list():
+            birth_place = individual.get_birth_place()
+            if birth_place is not None:
+                birth_places.append(birth_place)
+        return birth_places
+    
+    def get_individual_death_places (self):
+        death_places = []
+        for individual in self.get_individual_list():
+            death_place = individual.get_death_place()
+            if death_place is not None:
+                death_places.append(death_place)
+        return death_places
+    
+    def get_individual_marriage_places (self):
+        marriage_places = []
+        for individual in self.get_individual_list():
+            marriage_place = individual.get_marriage_place()
+            if marriage_place is not None:
+                marriage_places.append(marriage_place)
+        return marriage_places
+    
+    def get_family_marriage_places (self):
+        marriage_places = []
+        for family in self.get_family_list():
+            marriage_place = family.get_marriage_place()
+            if marriage_place is not None:
+                marriage_places.append(marriage_place)
+        return marriage_places
+
+        
     # Private methods
 
     @staticmethod

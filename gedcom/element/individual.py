@@ -201,6 +201,22 @@ class IndividualElement(Element):
         except ValueError:
             return -1
 
+    def get_birth_place(self):
+        """Returns the birth place of a person in string format
+        :rtype: str
+        """
+        place = ""
+
+        for child in self.get_child_elements():
+            if child.get_tag() == gedcom.tags.GEDCOM_TAG_BIRTH:
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_PLACE:
+                        place = childOfChild.get_value()
+
+        return place
+    
+    
+
     def get_death_data(self):
         """Returns the death data of a person formatted as a tuple: (`str` date, `str` place, `list` sources)
         :rtype: tuple
@@ -241,6 +257,35 @@ class IndividualElement(Element):
         except ValueError:
             return -1
 
+
+    def get_death_place (self):
+        """Returns the death place of a person in string format
+        :rtype: str
+        """
+        place = ""
+
+        for child in self.get_child_elements():
+            if child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH:
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_PLACE:
+                        place = childOfChild.get_value()
+
+        return place
+    
+    def get_marriage_place(self):
+        """Returns the marriage place of a person in string format
+        :rtype: str
+        """
+        place = ""
+
+        for child in self.get_child_elements():
+            if child.get_tag() == gedcom.tags.GEDCOM_TAG_MARRIAGE:
+                for childOfChild in child.get_child_elements():
+                    if childOfChild.get_tag() == gedcom.tags.GEDCOM_TAG_PLACE:
+                        place = childOfChild.get_value()
+
+        return place
+    
     @deprecated
     def get_burial(self):
         """Returns the burial data of a person formatted as a tuple: (`str` date, `str´ place, `list` sources)

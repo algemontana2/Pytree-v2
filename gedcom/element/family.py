@@ -39,3 +39,7 @@ class FamilyElement(Element):
 
     def get_tag(self):
         return gedcom.tags.GEDCOM_TAG_FAMILY
+    
+    def get_marriage_place(self):
+        """Returns the place of the marriage."""
+        return self.get_value(gedcom.tags.GEDCOM_TAG_MARR, gedcom.tags.GEDCOM_TAG_PLAC) 

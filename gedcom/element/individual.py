@@ -46,11 +46,10 @@ class IndividualElement(Element):
         """Checks if this individual is deceased
         :rtype: bool
         """
-        for child in self.get_child_elements():
-            if child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH:
-                return True
-
-        return False
+        return any(
+            child.get_tag() == gedcom.tags.GEDCOM_TAG_DEATH
+            for child in self.get_child_elements()
+        )
 
     def is_child(self):
         """Checks if this element is a child of a family
@@ -349,10 +348,7 @@ class IndividualElement(Element):
         """
         birth_year = self.get_birth_year()
 
-        if from_year <= birth_year <= to_year:
-            return True
-
-        return False
+        return from_year <= birth_year <= to_year
 
     def death_year_match(self, year):
         """Returns `True` if the given year matches the death year of this person
@@ -369,10 +365,7 @@ class IndividualElement(Element):
         """
         death_year = self.get_death_year()
 
-        if from_year <= death_year <= to_year:
-            return True
-
-        return False
+        return from_year <= death_year <= to_year
 
     def criteria_match(self, criteria):
         """Checks if this individual matches all of the given criteria

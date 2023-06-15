@@ -35,17 +35,16 @@ def test_parse_file():
 
     assert len(parser.get_root_child_elements()) == 34
 
-    individuals_in_root_child_elements = 0
-    individuals_in_element_list = 0
-
-    for element in parser.get_root_child_elements():
-        if isinstance(element, IndividualElement):
-            individuals_in_root_child_elements += 1
-
-    for element in parser.get_element_list():
-        if isinstance(element, IndividualElement):
-            individuals_in_element_list += 1
-
+    individuals_in_root_child_elements = sum(
+        1
+        for element in parser.get_root_child_elements()
+        if isinstance(element, IndividualElement)
+    )
+    individuals_in_element_list = sum(
+        1
+        for element in parser.get_element_list()
+        if isinstance(element, IndividualElement)
+    )
     assert individuals_in_root_child_elements == 20
     assert individuals_in_element_list == 20
 

@@ -181,8 +181,7 @@ class Element(object):
         self.get_child_elements()[:] = [child for child in self.get_child_elements() if
                                         child.get_tag() not in (gedcom.tags.GEDCOM_TAG_CONCATENATION, gedcom.tags.GEDCOM_TAG_CONTINUED)]
 
-        lines = value.splitlines()
-        if lines:
+        if lines := value.splitlines():
             line = lines.pop(0)
             n = self.__set_bounded_value(line)
             self.__add_concatenation(line[n:])
@@ -269,12 +268,12 @@ class Element(object):
         result = str(self.get_level())
 
         if self.get_pointer() != "":
-            result += ' ' + self.get_pointer()
+            result += f' {self.get_pointer()}'
 
-        result += ' ' + self.get_tag()
+        result += f' {self.get_tag()}'
 
         if self.get_value() != "":
-            result += ' ' + self.get_value()
+            result += f' {self.get_value()}'
 
         result += self.__crlf
 

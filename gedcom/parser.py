@@ -150,12 +150,10 @@ class Parser(object):
         self.invalidate_cache()
         self.__root_element = RootElement()
 
-        line_number = 1
         last_element = self.get_root_element()
 
-        for line in gedcom_stream:
+        for line_number, line in enumerate(gedcom_stream, start=1):
             last_element = self.__parse_line(line_number, line.decode('utf-8-sig'), last_element, strict)
-            line_number += 1
 
 
     def get_individual_birth_places (self):
@@ -257,7 +255,10 @@ class Parser(object):
                     pointer = None
                     value = line_parts[0][1:]
                     crlf = line_parts[1]
-                    if tag != gedcom.tags.GEDCOM_TAG_CONTINUED and tag != gedcom.tags.GEDCOM_TAG_CONCATENATION:
+                    if tag not in [
+                        gedcom.tags.GEDCOM_TAG_CONTINUED,
+                        gedcom.tags.GEDCOM_TAG_CONCATENATION,
+                    ]:
                         # Increment level and change this line to a CONC
                         level += 1
                         tag = gedcom.tags.GEDCOM_TAG_CONCATENATION
@@ -319,7 +320,7 @@ class Parser(object):
         marriages = []
         if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag"
             )
         # Get and analyze families where individual is spouse.
         families = self.get_families(individual, gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE)
@@ -345,7 +346,7 @@ class Parser(object):
 
         if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag"
             )
 
         # Get and analyze families where individual is spouse.
@@ -370,7 +371,7 @@ class Parser(object):
         """
         if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag"
             )
 
         years = self.get_marriage_years(individual)
@@ -385,14 +386,11 @@ class Parser(object):
         """
         if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag"
             )
 
         years = self.get_marriage_years(individual)
-        for year in years:
-            if from_year <= year <= to_year:
-                return True
-        return False
+        return any(from_year <= year <= to_year for year in years)
 
     def get_families(self, individual, family_type=gedcom.tags.GEDCOM_TAG_FAMILY_SPOUSE):
         """Return family elements listed for an individual
@@ -407,7 +405,7 @@ class Parser(object):
         """
         if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag"
             )
 
         families = []
@@ -433,7 +431,7 @@ class Parser(object):
         """
         if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag"
             )
 
         parents = self.get_parents(individual, ancestor_type)
@@ -457,7 +455,7 @@ class Parser(object):
         """
         if not isinstance(individual, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag" % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag"
             )
 
         parents = []
@@ -468,7 +466,7 @@ class Parser(object):
                 for family_member in family.get_child_elements():
 
                     if family_member.get_tag() == gedcom.tags.GEDCOM_TAG_CHILD \
-                       and family_member.get_value() == individual.get_pointer():
+                           and family_member.get_value() == individual.get_pointer():
 
                         for child in family_member.get_child_elements():
                             if child.get_value() == "Natural":
@@ -487,7 +485,7 @@ class Parser(object):
         """
         if not isinstance(descendant, IndividualElement) and isinstance(ancestor, IndividualElement):
             raise NotAnActualIndividualError(
-                "Operation only valid for elements with %s tag." % gedcom.tags.GEDCOM_TAG_INDIVIDUAL
+                f"Operation only valid for elements with {gedcom.tags.GEDCOM_TAG_INDIVIDUAL} tag."
             )
 
         if not path:
@@ -495,12 +493,11 @@ class Parser(object):
 
         if path[-1].get_pointer() == ancestor.get_pointer():
             return path
-        else:
-            parents = self.get_parents(descendant, "NAT")
-            for parent in parents:
-                potential_path = self.find_path_to_ancestor(parent, ancestor, path + [parent])
-                if potential_path is not None:
-                    return potential_path
+        parents = self.get_parents(descendant, "NAT")
+        for parent in parents:
+            potential_path = self.find_path_to_ancestor(parent, ancestor, path + [parent])
+            if potential_path is not None:
+                return potential_path
 
         return None
 
@@ -521,7 +518,7 @@ class Parser(object):
         """
         if not isinstance(family, FamilyElement):
             raise NotAnActualFamilyError(
-                "Operation only valid for element with %s tag." % gedcom.tags.GEDCOM_TAG_FAMILY
+                f"Operation only valid for element with {gedcom.tags.GEDCOM_TAG_FAMILY} tag."
             )
 
         family_members = []
@@ -529,13 +526,17 @@ class Parser(object):
 
         for child_element in family.get_child_elements():
             # Default is ALL
-            is_family = (child_element.get_tag() == gedcom.tags.GEDCOM_TAG_HUSBAND
-                         or child_element.get_tag() == gedcom.tags.GEDCOM_TAG_WIFE
-                         or child_element.get_tag() == gedcom.tags.GEDCOM_TAG_CHILD)
+            is_family = child_element.get_tag() in [
+                gedcom.tags.GEDCOM_TAG_HUSBAND,
+                gedcom.tags.GEDCOM_TAG_WIFE,
+                gedcom.tags.GEDCOM_TAG_CHILD,
+            ]
 
             if members_type == FAMILY_MEMBERS_TYPE_PARENTS:
-                is_family = (child_element.get_tag() == gedcom.tags.GEDCOM_TAG_HUSBAND
-                             or child_element.get_tag() == gedcom.tags.GEDCOM_TAG_WIFE)
+                is_family = child_element.get_tag() in [
+                    gedcom.tags.GEDCOM_TAG_HUSBAND,
+                    gedcom.tags.GEDCOM_TAG_WIFE,
+                ]
             elif members_type == FAMILY_MEMBERS_TYPE_HUSBAND:
                 is_family = child_element.get_tag() == gedcom.tags.GEDCOM_TAG_HUSBAND
             elif members_type == FAMILY_MEMBERS_TYPE_WIFE:
